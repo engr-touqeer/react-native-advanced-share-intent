@@ -38,7 +38,7 @@ class AdvancedShareIntentModule(
 
   override fun initialize() {
     super.initialize()
-    currentActivity?.intent?.let { intent ->
+    reactContext.currentActivity?.intent?.let { intent ->
       parseShareIntent(intent, true)?.let { payload ->
         initialShare = payload.copy()
         latestShare = payload.copy()
@@ -46,8 +46,7 @@ class AdvancedShareIntentModule(
     }
   }
 
-  override fun onNewIntent(intent: Intent?) {
-    if (intent == null) return
+  override fun onNewIntent(intent: Intent) {
     parseShareIntent(intent, false)?.let { payload ->
       latestShare = payload.copy()
       sendEventWhenReady(payload.copy())
@@ -55,7 +54,7 @@ class AdvancedShareIntentModule(
   }
 
   override fun onActivityResult(
-    activity: Activity?,
+    activity: Activity,
     requestCode: Int,
     resultCode: Int,
     data: Intent?
@@ -64,7 +63,7 @@ class AdvancedShareIntentModule(
   @ReactMethod
   fun getInitialShare(promise: Promise) {
     try {
-      val payload = initialShare ?: currentActivity?.intent?.let { parseShareIntent(it, true) }
+      val payload = initialShare ?: reactContext.currentActivity?.intent?.let { parseShareIntent(it, true) }
       initialShare = payload?.copy()
       promise.resolve(payload?.copy())
     } catch (error: Exception) {
@@ -76,7 +75,7 @@ class AdvancedShareIntentModule(
   fun clearSharedData(promise: Promise) {
     initialShare = null
     latestShare = null
-    currentActivity?.intent?.apply {
+    reactContext.currentActivity?.intent?.apply {
       action = null
       type = null
       data = null
