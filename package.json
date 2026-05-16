@@ -1,12 +1,60 @@
 {
   "name": "react-native-advanced-share-intent",
   "version": "1.0.0",
-  "description": "",
+  "description": "Production-ready React Native share intent handling for Android and iOS share extensions.",
   "main": "index.js",
+  "types": "index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "files": [
+    "android",
+    "ios",
+    "src",
+    "index.d.ts",
+    "index.js",
+    "react-native.config.js",
+    "react-native-advanced-share-intent.podspec",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run typecheck",
+    "prepack": "npm run typecheck"
   },
-  "keywords": [],
+  "keywords": [
+    "react-native",
+    "share",
+    "share-intent",
+    "android",
+    "ios",
+    "share-extension",
+    "files",
+    "mime"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/react-native-advanced-share-intent.git"
+  },
+  "homepage": "https://github.com/your-org/react-native-advanced-share-intent#readme",
+  "bugs": {
+    "url": "https://github.com/your-org/react-native-advanced-share-intent/issues"
+  },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": ">=0.72"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "react-native": ">=0.84.0",
+    "@types/react": "^19.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

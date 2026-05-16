@@ -1,6 +1,11 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "react-native": ["node_modules/react-native"],
+      "react-native-advanced-share-intent": ["../src"]
+    },
     "types": ["jest"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
