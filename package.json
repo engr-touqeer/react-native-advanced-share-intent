@@ -1,7 +1,7 @@
 {
   "name": "react-native-advanced-share-intent",
   "version": "1.0.0",
-  "description": "Production-ready React Native share intent handling for Android and iOS share extensions.",
+  "description": "Lightweight React Native share intent handling for Android and iOS share extensions.",
   "main": "index.js",
   "types": "index.d.ts",
   "react-native": "src/index.ts",
@@ -18,9 +18,10 @@
     "LICENSE"
   ],
   "scripts": {
+    "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "prepare": "npm run typecheck",
-    "prepack": "npm run typecheck"
+    "prepare": "npm run build",
+    "prepack": "npm run build"
   },
   "keywords": [
     "react-native",
@@ -30,17 +31,19 @@
     "ios",
     "share-extension",
     "files",
-    "mime"
+    "mime",
+    "typescript",
+    "share-sheet"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/react-native-advanced-share-intent.git"
+    "url": "git+https://github.com/engr-touqeer/react-native-advanced-share-intent.git"
   },
-  "homepage": "https://github.com/your-org/react-native-advanced-share-intent#readme",
+  "homepage": "https://github.com/engr-touqeer/react-native-advanced-share-intent#readme",
   "bugs": {
-    "url": "https://github.com/your-org/react-native-advanced-share-intent/issues"
+    "url": "https://github.com/engr-touqeer/react-native-advanced-share-intent/issues"
   },
-  "author": "",
+  "author": "Touqeer Ahmed",
   "license": "MIT",
   "peerDependencies": {
     "react": "*",

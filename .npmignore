@@ -1,0 +1,19 @@
+# Keep npm packages small even if local generated files exist.
+example/
+node_modules/
+**/node_modules/
+**/Pods/
+**/build/
+.gradle/
+android/.gradle/
+**/.gradle/
+**/DerivedData/
+**/xcuserdata/
+**/.DS_Store
+.vscode/
+.idea/
+coverage/
+*.log
+package-lock.json
+yarn.lock
+**/yarn.lock

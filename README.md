@@ -1,75 +1,44 @@
 # react-native-advanced-share-intent
 
-Production-ready share intent handling for React Native apps.
+Lightweight React Native share intent handling for Android and iOS Share Extensions.
 
-`react-native-advanced-share-intent` exposes a small typed API for reading content shared into your app from Android share sheets and iOS Share Extensions. It supports cold starts, foreground shares, multiple files, text, URLs, images, videos, documents, MIME metadata, and explicit cleanup.
+`react-native-advanced-share-intent` exposes a small typed API for reading content shared into your app from Android share sheets and iOS Share Extensions. It supports cold starts, foreground shares, text, URLs, images, videos, documents, multiple files, metadata, and explicit cleanup.
 
 ## Features
 
 - Android `ACTION_SEND` and `ACTION_SEND_MULTIPLE`
 - iOS Share Extension support with App Groups
-- `getInitialShare()` for cold start delivery
-- `addShareListener()` for foreground/new-intent delivery
-- `clearSharedData()` for cleanup after processing
-- Multiple files without copying large Android `content://` assets into JS memory
+- Cold-start delivery with `getInitialShare()`
+- Foreground delivery with `addShareListener()`
+- Cleanup with `clearSharedData()`
+- Text, URL, image, video, document, and multi-file shares
+- File name, size, MIME type, original URI, and capture date metadata where available
 - iOS Photos asset preservation with `ph://` local identifiers when available
-- `dateTaken`, original URI, file name, size, and MIME metadata where the platform exposes it
 - TypeScript definitions
 - No runtime dependencies
-- Compatible with current React Native autolinking and New Architecture apps
+- React Native autolinking support
 
 ## Installation
+
+Using npm:
 
 ```sh
 npm install react-native-advanced-share-intent
 ```
+
+Using Yarn:
+
+```sh
+yarn add react-native-advanced-share-intent
+```
+
+For iOS, install pods after adding the package:
 
 ```sh
 cd ios && pod install
 ```
 
 Rebuild the native app after installation.
-
-## API
-
-```ts
-import ShareIntent from 'react-native-advanced-share-intent';
-
-const data = await ShareIntent.getInitialShare();
-
-const subscription = ShareIntent.addShareListener(data => {
-  console.log(data);
-});
-
-await ShareIntent.clearSharedData();
-subscription.remove();
-```
-
-### ShareIntentPayload
-
-```ts
-type ShareIntentPayload = {
-  text?: string;
-  subject?: string;
-  title?: string;
-  mimeType?: string;
-  files: SharedFile[];
-  webUrl?: string;
-  isInitial: boolean;
-  receivedAt: number;
-};
-
-type SharedFile = {
-  uri: string;
-  fileName?: string;
-  mimeType?: string;
-  size?: number;
-  type: 'text' | 'image' | 'video' | 'document' | 'unknown';
-  dateTaken?: number;
-  localIdentifier?: string;
-  originalUri?: string;
-};
-```
 
 ## Android Setup
 
@@ -100,7 +69,7 @@ Add share intent filters to the activity that hosts React Native. Keep `launchMo
 </activity>
 ```
 
-Android returns shared files as provider-backed `content://` URIs. The library does not read file bytes into JavaScript, which keeps large media and multi-file shares stable. Pass the URI to your uploader, media pipeline, or a native file-copy step when your app specifically needs a local copy.
+Android returns shared files as provider-backed `content://` URIs. The library does not copy large file bytes into JavaScript memory. Pass the URI to your uploader, media pipeline, or a native file-copy step when your app needs a local copy.
 
 ## iOS Setup
 
@@ -125,19 +94,35 @@ final class ShareViewController: AdvancedShareIntentShareExtension {
 }
 ```
 
-5. Configure the App Group once from JavaScript before reading initial data:
+5. Configure the App Group from JavaScript before reading initial data:
 
 ```ts
 import ShareIntent from 'react-native-advanced-share-intent';
 
 await ShareIntent.setAppGroupIdentifier('group.com.example.myapp');
 await ShareIntent.setContainingAppScheme('myapp');
+
 const initialShare = await ShareIntent.getInitialShare();
 ```
 
 The extension preserves Photos library items as `ph://` URIs with `localIdentifier` when iOS exposes a `PHAsset`. Other files are copied into the App Group container and returned as `file://` URLs. For long-running uploads, copy or consume those files promptly after receiving the payload, then call `clearSharedData()` to remove cached share-extension files.
 
-## Usage Pattern
+## Usage
+
+Read the share that launched the app:
+
+```ts
+import ShareIntent from 'react-native-advanced-share-intent';
+
+const share = await ShareIntent.getInitialShare();
+
+if (share) {
+  console.log(share.text);
+  console.log(share.files);
+}
+```
+
+Listen for new shares while the app is running:
 
 ```ts
 import { useEffect, useState } from 'react';
@@ -159,65 +144,178 @@ export function useShareIntent() {
 }
 ```
 
-After your app has processed a share, call:
+Clear processed shared data:
 
 ```ts
 await ShareIntent.clearSharedData();
 ```
 
-This prevents the same cold-start payload from being processed repeatedly.
+## API Reference
+
+### `getInitialShare()`
+
+```ts
+getInitialShare(): Promise<ShareIntentPayload | null>
+```
+
+Returns the share payload that launched the app, or `null` when the app was not opened from a share.
+
+### `addShareListener(listener)`
+
+```ts
+addShareListener(listener: ShareIntentListener): EmitterSubscription
+```
+
+Subscribes to share payloads delivered after the app is already running. Call `subscription.remove()` during cleanup.
+
+### `clearSharedData()`
+
+```ts
+clearSharedData(): Promise<void>
+```
+
+Clears the cached share payload and removes iOS App Group files created by the Share Extension.
+
+### `setAppGroupIdentifier(identifier)`
+
+```ts
+setAppGroupIdentifier(identifier: string): Promise<void>
+```
+
+iOS only. Sets the App Group used by the containing app and Share Extension.
+
+### `setContainingAppScheme(scheme)`
+
+```ts
+setContainingAppScheme(scheme: string): Promise<void>
+```
+
+iOS only. Stores the URL scheme used by the Share Extension to reopen the containing app.
+
+### Types
+
+```ts
+type ShareIntentPayload = {
+  text?: string;
+  subject?: string;
+  title?: string;
+  mimeType?: string;
+  files: SharedFile[];
+  webUrl?: string;
+  isInitial: boolean;
+  receivedAt: number;
+};
+
+type SharedFile = {
+  uri: string;
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+  type: 'text' | 'image' | 'video' | 'document' | 'unknown';
+  dateTaken?: number;
+  localIdentifier?: string;
+  originalUri?: string;
+};
+```
 
 ## Example App
 
-The `example` app is configured to receive Android shares and display the parsed payload:
+The example app stays in the GitHub repository so contributors and users can test the native behavior. It is excluded from the npm package through the root `package.json` `files` allowlist.
+
+Clone and run the example app with npm:
 
 ```sh
-cd example
+git clone https://github.com/engr-touqeer/react-native-advanced-share-intent
+cd react-native-advanced-share-intent/example
 npm install
+cd ios && pod install
+cd ..
+npm run ios
 npm run android
 ```
 
-For iOS, add a Share Extension target to the example app and use the iOS setup above.
+Or run it with Yarn:
 
-## Package Structure
+```sh
+git clone https://github.com/engr-touqeer/react-native-advanced-share-intent
+cd react-native-advanced-share-intent/example
+yarn install
+cd ios && pod install
+cd ..
+yarn ios
+yarn android
+```
+
+The Android example is configured to receive share intents and display the parsed payload. For iOS testing, add a Share Extension target to the example app and follow the iOS setup above with your own App Group and URL scheme.
+
+## Publishing
+
+Install, build, and inspect the package with npm:
+
+```sh
+npm install
+npm run build
+npm pack --dry-run
+npm publish --access public
+```
+
+Install, build, and inspect the package with Yarn:
+
+```sh
+yarn install
+yarn build
+yarn pack --dry-run
+```
+
+The npm package is intentionally limited to:
 
 ```txt
-android/                         Android native module
-ios/                             iOS bridge and Share Extension helper
-src/                             TypeScript public API
-example/                         React Native example app
-react-native-advanced-share-intent.podspec
+android/
+ios/
+src/
+index.js
+index.d.ts
 react-native.config.js
+react-native-advanced-share-intent.podspec
+README.md
+LICENSE
 ```
 
-## Publishing Checklist
+This keeps the published package lightweight while preserving the full example app in GitHub.
 
-Before publishing:
+## Lockfile Policy
 
-1. Replace `repository`, `homepage`, and `bugs` in `package.json`.
-2. Run `npm run typecheck`.
-3. Run `npm pack --dry-run` and inspect the included files.
-4. Test Android shares with text, one file, and multiple large files.
-5. Test iOS Share Extension delivery with the real App Group and URL scheme.
-6. Publish with `npm publish --access public`.
+Use one package manager lockfile style in committed changes. This repository uses npm as the primary lockfile source with `package-lock.json`. Yarn is supported for installs and scripts, but `yarn.lock` should not be committed unless the project intentionally switches to Yarn as the primary package manager.
 
-## PartySharing Integration Notes
+## Troubleshooting
 
-Keep PartySharing-specific routing, upload logic, auth, analytics, and domain parsing inside PartySharing. This package should only deliver normalized share payloads. A clean integration usually looks like:
+### The native module is not linked
 
-```ts
-const share = await ShareIntent.getInitialShare();
-if (share) {
-  navigation.navigate('ShareImport', { share });
-}
+Run `pod install` for iOS, rebuild the native app, and make sure React Native autolinking can see the package.
+
+### Android shares do not arrive while the app is open
+
+Confirm the host activity uses `android:launchMode="singleTask"` and has the `SEND` or `SEND_MULTIPLE` intent filters for the MIME types you want to support.
+
+### iOS returns `null`
+
+Confirm the main app and Share Extension use the same App Group, the Share Extension subclasses `AdvancedShareIntentShareExtension`, and JavaScript calls `setAppGroupIdentifier()` before `getInitialShare()`.
+
+### Large files are slow or fail to upload
+
+The library returns provider or App Group file URIs. Copy, stream, or upload those files from a native-capable file pipeline instead of reading large files into JavaScript memory.
+
+## Contributing
+
+Issues and pull requests are welcome. Please keep changes focused, preserve Android and iOS share intent behavior, and test with text, one file, and multiple files where possible.
+
+Before opening a pull request:
+
+```sh
+npm install
+npm run build
+npm pack --dry-run
 ```
-
-The native implementation was shaped from the PartySharing production flow but generalized:
-
-- Android keeps pending shares and retries delivery while the React bridge/listener becomes ready.
-- Android reads `OpenableColumns`, `MediaStore.MediaColumns.DATE_TAKEN`, MIME type, and multi-file `ClipData`/`EXTRA_STREAM`.
-- iOS stores extension payloads in an App Group, emits when the main app becomes active, preserves Photos `localIdentifier`, and sorts mixed image/video batches by capture date when needed.
-- Legacy PartySharing keys are only read as a migration convenience; new apps use the generic `AdvancedShareIntentPayload` key.
 
 ## License
 

@@ -9,6 +9,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmit": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "react-native": ["example/node_modules/react-native"]

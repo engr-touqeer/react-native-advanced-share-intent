@@ -6,7 +6,6 @@
 
 static NSString *const AdvancedShareIntentEventName = @"AdvancedShareIntentReceived";
 static NSString *const AdvancedShareIntentDefaultsKey = @"AdvancedShareIntentPayload";
-static NSString *const AdvancedShareIntentLegacyDefaultsKey = @"sharedMediaData";
 static NSString *const AdvancedShareIntentAppGroupKey = @"AdvancedShareIntentAppGroupIdentifier";
 static NSString *const AdvancedShareIntentContainingAppSchemeKey = @"AdvancedShareIntentContainingAppScheme";
 
@@ -82,7 +81,6 @@ RCT_REMAP_METHOD(clearSharedData,
   self.initialPayload = nil;
   NSUserDefaults *defaults = [self sharedDefaults];
   [defaults removeObjectForKey:AdvancedShareIntentDefaultsKey];
-  [defaults removeObjectForKey:AdvancedShareIntentLegacyDefaultsKey];
   [defaults synchronize];
   [self removeSharedFiles];
   resolve(nil);
@@ -140,9 +138,6 @@ RCT_REMAP_METHOD(setContainingAppScheme,
   NSUserDefaults *defaults = [self sharedDefaults];
   NSDictionary *storedPayload = [defaults dictionaryForKey:AdvancedShareIntentDefaultsKey];
   if (storedPayload == nil) {
-    storedPayload = [self normalizeLegacyPayload:[defaults dictionaryForKey:AdvancedShareIntentLegacyDefaultsKey]];
-  }
-  if (storedPayload == nil) {
     return nil;
   }
 
@@ -156,75 +151,6 @@ RCT_REMAP_METHOD(setContainingAppScheme,
   }
 
   return payload;
-}
-
-- (NSDictionary *)normalizeLegacyPayload:(NSDictionary *)legacyPayload
-{
-  if (legacyPayload == nil) {
-    return nil;
-  }
-
-  NSArray *media = legacyPayload[@"media"];
-  if (![media isKindOfClass:[NSArray class]]) {
-    return nil;
-  }
-
-  NSMutableArray *files = [NSMutableArray arrayWithCapacity:media.count];
-  for (NSDictionary *item in media) {
-    if (![item isKindOfClass:[NSDictionary class]]) {
-      continue;
-    }
-
-    NSString *uri = item[@"uri"];
-    if (![uri isKindOfClass:[NSString class]] || uri.length == 0) {
-      continue;
-    }
-
-    NSString *mimeType = [self mimeTypeFromLegacyType:item[@"type"]];
-    NSMutableDictionary *file = [@{
-      @"uri": uri,
-      @"type": [self classifyMimeType:mimeType],
-      @"mimeType": mimeType,
-      @"originalUri": item[@"originalUri"] ?: uri
-    } mutableCopy];
-
-    if (item[@"name"] != nil) {
-      file[@"fileName"] = item[@"name"];
-      file[@"name"] = item[@"name"];
-    }
-    if (item[@"dateTaken"] != nil) {
-      file[@"dateTaken"] = item[@"dateTaken"];
-    }
-    if (item[@"localIdentifier"] != nil) {
-      file[@"localIdentifier"] = item[@"localIdentifier"];
-    }
-
-    [files addObject:file];
-  }
-
-  if (files.count == 0) {
-    return nil;
-  }
-
-  return @{
-    @"files": files,
-    @"mimeType": ((NSDictionary *)files.firstObject)[@"mimeType"] ?: @"application/octet-stream",
-    @"receivedAt": legacyPayload[@"timestamp"] ?: @([[NSDate date] timeIntervalSince1970] * 1000)
-  };
-}
-
-- (NSString *)mimeTypeFromLegacyType:(NSString *)legacyType
-{
-  if (![legacyType isKindOfClass:[NSString class]] || legacyType.length == 0) {
-    return @"application/octet-stream";
-  }
-  if ([legacyType isEqualToString:@"photos/asset"]) {
-    return @"photos/asset";
-  }
-  if ([legacyType isEqualToString:@"text/url"]) {
-    return @"text/url";
-  }
-  return legacyType;
 }
 
 - (NSString *)classifyMimeType:(NSString *)mimeType
