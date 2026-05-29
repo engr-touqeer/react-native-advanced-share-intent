@@ -17,6 +17,7 @@ export type ShareIntentType = 'text' | 'image' | 'video' | 'document' | 'unknown
 export type SharedFile = {
   uri: string;
   fileName?: string;
+  name?: string;
   mimeType?: string;
   size?: number;
   type: ShareIntentType;
@@ -123,5 +124,11 @@ const ShareIntent = {
     await nativeModule.setContainingAppScheme(scheme);
   },
 };
+
+export const getInitialShare = ShareIntent.getInitialShare;
+export const addShareListener = ShareIntent.addShareListener;
+export const clearSharedData = ShareIntent.clearSharedData;
+export const setAppGroupIdentifier = ShareIntent.setAppGroupIdentifier;
+export const setContainingAppScheme = ShareIntent.setContainingAppScheme;
 
 export default ShareIntent;

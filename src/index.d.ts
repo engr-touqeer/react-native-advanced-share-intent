@@ -5,6 +5,7 @@ export type ShareIntentType = 'text' | 'image' | 'video' | 'document' | 'unknown
 export type SharedFile = {
   uri: string;
   fileName?: string;
+  name?: string;
   mimeType?: string;
   size?: number;
   type: ShareIntentType;
@@ -33,5 +34,11 @@ declare const ShareIntent: {
   setAppGroupIdentifier(identifier: string): Promise<void>;
   setContainingAppScheme(scheme: string): Promise<void>;
 };
+
+export declare const getInitialShare: typeof ShareIntent.getInitialShare;
+export declare const addShareListener: typeof ShareIntent.addShareListener;
+export declare const clearSharedData: typeof ShareIntent.clearSharedData;
+export declare const setAppGroupIdentifier: typeof ShareIntent.setAppGroupIdentifier;
+export declare const setContainingAppScheme: typeof ShareIntent.setContainingAppScheme;
 
 export default ShareIntent;

@@ -150,6 +150,18 @@ Clear processed shared data:
 await ShareIntent.clearSharedData();
 ```
 
+Named function exports are also available:
+
+```ts
+import {
+  getInitialShare,
+  addShareListener,
+  clearSharedData,
+} from 'react-native-advanced-share-intent';
+```
+
+For a compact copyable component, see [`examples/BasicShareIntent.tsx`](examples/BasicShareIntent.tsx).
+
 ## API Reference
 
 ### `getInitialShare()`
@@ -209,6 +221,7 @@ type ShareIntentPayload = {
 type SharedFile = {
   uri: string;
   fileName?: string;
+  name?: string;
   mimeType?: string;
   size?: number;
   type: 'text' | 'image' | 'video' | 'document' | 'unknown';
@@ -256,7 +269,6 @@ Install, build, and inspect the package with npm:
 npm install
 npm run build
 npm pack --dry-run
-npm publish --access public
 ```
 
 Install, build, and inspect the package with Yarn:
@@ -267,6 +279,16 @@ yarn build
 yarn pack --dry-run
 ```
 
+Publish manually only after reviewing the dry-run output:
+
+```sh
+npm login
+npm whoami
+npm publish --access public
+```
+
+npm requires either account 2FA or a granular access token with publish access and bypass 2FA enabled. If publish fails with `E403`, confirm 2FA is enabled for your npm account or create a granular npm access token with the required publishing permissions.
+
 The npm package is intentionally limited to:
 
 ```txt
@@ -274,6 +296,7 @@ android/
 ios/
 src/
 index.js
+index.mjs
 index.d.ts
 react-native.config.js
 react-native-advanced-share-intent.podspec

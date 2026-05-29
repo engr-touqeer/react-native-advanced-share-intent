@@ -12,8 +12,12 @@ android/.gradle/
 **/.DS_Store
 .vscode/
 .idea/
+android/.project
+*.iml
 coverage/
 *.log
 package-lock.json
 yarn.lock
 **/yarn.lock
+npm-debug.log*
+yarn-error.log*

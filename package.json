@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "description": "Lightweight React Native share intent handling for Android and iOS share extensions.",
   "main": "index.js",
+  "module": "index.mjs",
   "types": "index.d.ts",
   "react-native": "src/index.ts",
   "source": "src/index.ts",
   "files": [
-    "android",
+    "android/build.gradle",
+    "android/src",
     "ios",
     "src",
     "index.d.ts",
     "index.js",
+    "index.mjs",
     "react-native.config.js",
     "react-native-advanced-share-intent.podspec",
     "README.md",
@@ -19,6 +22,8 @@
   ],
   "scripts": {
     "build": "tsc --noEmit",
+    "lint": "tsc --noEmit --pretty false",
+    "test": "npm run typecheck",
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build",
     "prepack": "npm run build"
@@ -46,13 +51,15 @@
   "author": "Touqeer Ahmed",
   "license": "MIT",
   "peerDependencies": {
-    "react": "*",
-    "react-native": ">=0.72"
+    "react": ">=18.2.0",
+    "react-native": ">=0.72.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "react-native": ">=0.84.0",
-    "@types/react": "^19.0.0"
+    "@babel/core": "^7.25.2",
+    "@types/react": "^19.2.0",
+    "react": "19.2.3",
+    "react-native": "0.84.1",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18"

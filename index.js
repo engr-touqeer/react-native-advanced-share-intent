@@ -85,3 +85,8 @@ const ShareIntent = {
 
 module.exports = ShareIntent;
 module.exports.default = ShareIntent;
+module.exports.getInitialShare = ShareIntent.getInitialShare;
+module.exports.addShareListener = ShareIntent.addShareListener;
+module.exports.clearSharedData = ShareIntent.clearSharedData;
+module.exports.setAppGroupIdentifier = ShareIntent.setAppGroupIdentifier;
+module.exports.setContainingAppScheme = ShareIntent.setContainingAppScheme;
